@@ -1,0 +1,67 @@
+ext {
+    shadow = '5.0.0'
+    dockerImagePlugin = '0.21.0'
+    gitVersioning = '0.11.0'
+    jackson = '2.10.3'
+    sl4j = '1.7.25'
+    logstashLogbackEncoder = '5.0'
+    logback = '1.2.2'
+    dockerComposePlugin = '0.8.4'
+    flyway = '5.2.4'
+    postgres = '42.2.0'
+    hikari = '2.7.6'
+    kafka = '2.2.1'
+    mockito = '3.0.0'
+    wiremock = "2.25.1"
+    jooq = '3.13.5'
+    typeSafeConfig = '1.4.0'
+    junit = '5.7.0'
+    googleJavaFormat = '0.9'
+
+    libraries = [
+            'dockerComposePlugin'   : "com.avast.gradle:gradle-docker-compose-plugin:$dockerComposePlugin",
+            'mockito'               : "org.mockito:mockito-core:$mockito",
+            'wiremock'              : "com.github.tomakehurst:wiremock-jre8:$wiremock",
+
+            // json
+            'jacksonCore'           : "com.fasterxml.jackson.core:jackson-core:$jackson",
+            'jacksonDatabind'       : "com.fasterxml.jackson.core:jackson-databind:$jackson",
+            'jacksonJsr310'         : "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jackson",
+
+            //logging
+            'sl4j'                  : "org.slf4j:slf4j-api:$sl4j",
+            'logstashLogbackEncoder': "net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoder",
+            'logbackClassic'        : "ch.qos.logback:logback-classic:$logback",
+
+
+            //shadow plugin
+            "shadowPlugin"          : "com.github.jengelman.gradle.plugins:shadow:$shadow",
+
+            //docker image
+            "dockerPlugin"          : "gradle.plugin.com.palantir.gradle.docker:gradle-docker:$dockerImagePlugin",
+            "gitVersioningPlugin"   : "gradle.plugin.com.palantir.gradle.gitversion:gradle-git-version:$gitVersioning",
+
+
+            //db
+            'flyway'                : "org.flywaydb:flyway-core:$flyway",
+            'postgres'              : "org.postgresql:postgresql:$postgres",
+            'hikari'                : "com.zaxxer:HikariCP:$hikari",
+
+            //kafka
+            'kafka'                 : "org.apache.kafka:kafka_2.12:$kafka",
+
+
+            //jooq
+            "jooq"                  : "org.jooq:jooq:$jooq",
+
+            //config
+            "typeSafeConfig"        : "com.typesafe:config:$typeSafeConfig",
+
+            //test
+            "junit"                 : "org.junit:junit-bom:$junit",
+            "junitJupiter"          : "org.junit.jupiter:junit-jupiter",
+
+            //formatter
+            'googleJavaFormat'      : "com.github.sherter.google-java-format"
+    ]
+}

@@ -1,0 +1,15 @@
+version: '3.5'
+
+services:
+  metrics-collector:
+    image: systemmetricscollector:2020W42-6a4825d257
+    restart: on-failure:3
+    depends_on:
+      - kafka
+      - zookeeper
+      - postgres
+    ports:
+      - "8080:8080"
+      - "5005:5005"
+    environment:
+      JAVA_OPTS: -Dconfig.resource=docker.conf -Dlogback.configurationFile=logback.xml -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005

@@ -1,0 +1,144 @@
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    apply from: 'gradle/dependencies.gradle'
+    dependencies {
+        classpath "$libraries.dockerComposePlugin"
+        classpath "$libraries.shadowPlugin"
+        classpath "$libraries.dockerPlugin"
+        classpath "$libraries.gitVersioningPlugin"
+    }
+}
+plugins {
+    id 'java-library'
+    id 'com.github.sherter.google-java-format' version '0.9'
+}
+Map<String, String> libraries = rootProject.ext.libraries
+apply plugin: 'application'
+apply plugin: 'idea'
+apply plugin: "com.github.johnrengelman.shadow"
+apply plugin: "com.palantir.git-version"
+apply plugin: "com.palantir.docker"
+apply plugin: 'docker-compose'
+apply plugin: 'com.github.sherter.google-java-format'
+
+group 'com.sahlone'
+version '1.0.1'
+
+java {
+    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_11
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+googleJavaFormat {
+    options style: 'GOOGLE'
+}
+
+dependencies {
+    //kafka
+    implementation libraries.kafka
+    //logging
+    implementation libraries.logstashLogbackEncoder
+    implementation libraries.logbackClassic
+
+    //json
+    implementation libraries.jacksonCore
+    implementation libraries.jacksonDatabind
+    implementation libraries.jacksonJsr310
+
+    //db
+    implementation libraries.flyway
+    implementation libraries.postgres
+    implementation libraries.hikari
+    implementation libraries.jooq
+    implementation libraries.typeSafeConfig
+
+    //test
+    testImplementation(platform(libraries.junit))
+    testImplementation libraries.junitJupiter
+
+}
+def baseDockerFile = file("${rootProject.projectDir}/docker/Dockerfile")
+def rootDockerDir = file("${rootProject.projectDir}/docker")
+def gitDetails = versionDetails()
+def currentWeek = new Date().format("yyyy'W'ww")
+String jarName = shadowJar.archiveName
+String tag = "$currentWeek-${gitDetails.gitHash}"
+String taggedDockerImageName = "${project.name.toLowerCase()}:$tag"
+docker {
+    name = taggedDockerImageName
+    buildArgs([JAR_NAME: jarName])
+    dockerfile baseDockerFile
+    files shadowJar.outputs.files, "${rootProject.projectDir}/docker/start-app.sh"
+}
+task dockerPushTag(type: Exec) {
+    def registry = project.hasProperty('registry') ? project.property('registry') : 'docker.io'
+    def remote = "$registry/${project.name}:$tag"
+    commandLine 'sh', '-c', "docker tag $taggedDockerImageName $remote && docker push $remote"
+}
+dockerCompose {
+    environment["DOCKER_IMAGE"] = taggedDockerImageName
+    useComposeFiles = ['docker-compose-env.yaml', 'docker-compose.yaml']
+    captureContainersOutput = true
+    waitForTcpPorts = true
+    dockerComposeWorkingDirectory = "$rootDockerDir"
+    projectName = "${project.name}"
+    stopContainers = true
+    removeContainers = true
+    removeVolumes = true
+    removeOrphans = false
+    waitForHealthyStateTimeout = java.time.Duration.ofMinutes(1)
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+sourceSets {
+    functionalTest {
+        java {
+            compileClasspath += sourceSets.main.output
+            runtimeClasspath += sourceSets.main.output
+            srcDirs = ['src/functional-tests/java']
+        }
+        resources.srcDirs = ['src/functional-tests/resources', 'src/test/resources']
+    }
+}
+configurations {
+    functionalTestImplementation.extendsFrom testImplementation
+    functionalTestRuntime.extendsFrom testRuntime
+}
+task functionalTest(type: Test) {
+    description = 'Runs functional tests.'
+    group = 'verification'
+    testClassesDirs = sourceSets.functionalTest.output.classesDirs
+    classpath = sourceSets.functionalTest.runtimeClasspath
+    mustRunAfter test
+}
+
+functionalTest {
+    useJUnitPlatform()
+}
+tasks.docker.dependsOn assemble
+tasks.docker.dependsOn dockerPrepare
+functionalTest.dependsOn(tasks.docker)
+functionalTest.dependsOn(tasks.composeUp)
+composeUp.dependsOn tasks.docker
+functionalTest.dependsOn(tasks.docker)
+dockerPushTag.dependsOn(tasks.docker)
+dockerCompose.isRequiredBy(functionalTest)
+check.dependsOn(verifyGoogleJavaFormat)
+check.dependsOn(functionalTest)
+mainClassName = 'com.sahlone.app.smc.Main'
+
