@@ -140,5 +140,6 @@ functionalTest.dependsOn(tasks.docker)
 dockerPushTag.dependsOn(tasks.docker)
 dockerCompose.isRequiredBy(functionalTest)
 check.dependsOn(verifyGoogleJavaFormat)
+check.dependsOn(functionalTest)
 mainClassName = 'com.sahlone.app.smc.Main'
 
