@@ -1,0 +1,14 @@
+.*
+!.docker
+.DS_Store
+.gradle
+.gradletasknamecache
+.java-version
+**/.gradle/
+**/.idea/
+**/build/
+**/out/
+**/bin/
+**/RemoteSystemsTempFiles/
+**/bin/
+**/wiremock/
