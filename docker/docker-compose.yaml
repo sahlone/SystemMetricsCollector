@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   metrics-collector:
-    image: systemmetricscollector:2020W42-6a4825d257
+    image: ${DOCKER_IMAGE}
     restart: on-failure:3
     depends_on:
       - kafka
