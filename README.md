@@ -1,17 +1,25 @@
 # System Metrics Collector
 
-[![](https://jitpack.io/v/sahlone/SystemMetricsCollector.svg?label=Release)](https://jitpack.io/#sahlone/SystemMetricsCollector)
-
 System Metrics Collector is a small app written to produce the system metrics like CPU , Memory and Disk metrics and publish it to the kafka cluster. The metrics are then consumed from kafka and then injected into database as time series data for later inspection.
 ### Verifying the APP
 Ifg you want to verify the app for full package like Unit test, functional tests.
-Then the app comes with an inbuild docker setup which will run all the  dependencies in an isolated docker containers. Once the containers are started, the App will already start publishing metrics and consuming and saving it in database. For analysis you can connect to database on port 5432 localhost to verifiy the data.
+Then the app comes with an in build docker setup which will run all the  dependencies in an isolated docker containers. Once the containers are started, the App will already start publishing metrics and consuming and saving it in database. For analysis you can connect to database on port 5432 localhost to verifiy the data.
 ```
-$./gradlew clean build
+$ ./gradlew clean build
+```
+Also the system contains functional tests that can be verified if needed. This requires to have a docer deamon running as docker containers are used for verifying the build
+
+```
+$ ./gradlew clean functionalTest
+```
+### Create Docker Image
+To create the docker image that can be used to run the system
+```
+$ ./gradlew clean build dockerPushtag -Pregistry=registrytopushto
 ```
 ### Setup
 For local setup we have two options:
-##### External kafka and Postgress dependencies
+##### External kafka and Postgres dependencies
 For application to work with external dependencies, various system variables need to be setup before the app can start. The variables are injected using the environment variables. The variables are as follows:
 ```
 JDBC_URL
@@ -22,7 +30,7 @@ SYSTEM_METRICS_TOPIC
 ```
 The above variables are a minimum required for a basic startup without tuning any application parameters
 If you want to fine tune the application, please have a look at the `application.conf` for the extensive list of variables that can be used to modify the behaviour.
-##### Inbuild docker dependencies
+##### In build docker dependencies
 If you dont have a Kafka and postgress instance running , then you can use the auto built in capabilities to test the app with docker.
 To start the app and the dependencies below command can be used.
 ```
@@ -46,3 +54,4 @@ ENABLE_PRODUCER
 5.  The application is built with java beans (mutability) because of libraries used like type safe. Immutability should be the preferred way.
 6.  Usage of dependency injection
 7.  The shutdown procedure is not written for the app, so no controlled shutdown available.
+8. Integrate github Actions/CI-CD to check every merge to master and every Pull request integrity

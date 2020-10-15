@@ -82,7 +82,7 @@ docker {
 }
 task dockerPushTag(type: Exec) {
     def registry = project.hasProperty('registry') ? project.property('registry') : 'docker.io'
-    def remote = "$registry/${project.name}:$tag"
+    def remote = "$registry/${project.name.toLowerCase()}:$tag"
     commandLine 'sh', '-c', "docker tag $taggedDockerImageName $remote && docker push $remote"
 }
 dockerCompose {
@@ -139,6 +139,5 @@ functionalTest.dependsOn(tasks.docker)
 dockerPushTag.dependsOn(tasks.docker)
 dockerCompose.isRequiredBy(functionalTest)
 check.dependsOn(verifyGoogleJavaFormat)
-check.dependsOn(functionalTest)
 mainClassName = 'com.sahlone.app.smc.Main'
 
