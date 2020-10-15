@@ -93,6 +93,7 @@ dockerCompose {
     dockerComposeWorkingDirectory = "$rootDockerDir"
     projectName = "${project.name}"
     stopContainers = true
+    forceRecreate = true
     removeContainers = true
     removeVolumes = true
     removeOrphans = false

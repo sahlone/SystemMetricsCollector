@@ -11,5 +11,5 @@ ADD ./start-app.sh start-app.sh
 EXPOSE 8080
 
 ENV JAR_NAME "${JAR_NAME}"
-# Dont need health check as main java process started by CMD will exit if startup fails
+HEALTHCHECK --interval=10s --timeout=3s --retries=10 CMD netstat -an | grep 9083 > /dev/null; if [ 0 != $? ]; then exit 1; fi; || exit 1
 CMD ["sh", "start-app.sh"]
